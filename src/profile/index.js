@@ -27,17 +27,41 @@ import {
     Right
   } from "native-base";
 import {CONSTANTS,COLORS,styles} from '../../Constants';
+import {PROFILEAPI} from '../api';
 type Props = {};
+const mapStateToProps = state => ({
+  credentials:state.auth
+});
 class Profile extends Component<Props> {
   constructor(props){
     super(props);
     this.state= {
       name:'',
       email:'',
-      password:'',
+      wdcode:'',
       website:'',
-      gst:''
+      gst:'',
+      credentials:this.props.credentials
     }
+  }
+  componentDidMount(){
+    let {credentials} = this.state;
+    PROFILEAPI(credentials.userID,credentials.token)
+      .then(res => {
+        console.log(res);
+        if(res.error==undefined){
+          this.setState({
+            name:res.Name,
+            email:res.email,
+            website:res.website,
+            wdcode:res.WDCode,
+            gst:res.GSTNo
+          })
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      })
   }
   render() {
     return (
@@ -63,7 +87,7 @@ class Profile extends Component<Props> {
                       />
                   </View>
                   <View style={{flex:5,justifyContent:'center',alignItems:'flex-start',marginTop:20,marginBottom:20,paddingLeft:10}}>
-                      <Text style={{fontSize:28,fontWeight:'bold'}}>{'Siva Agency'}</Text>
+                      <Text style={{fontSize:28,fontWeight:'bold'}}>{this.state.name}</Text>
                       <Text style={{fontSize:18}}>{'Hosur'}</Text>
                   </View>
             </View>
@@ -87,27 +111,22 @@ class Profile extends Component<Props> {
                  value={this.state.website}
                 onChangeText={website => this.setState({ website: website  })}
               />
-              <Text style={styles.profiletextHeader}>{CONSTANTS.LOGINFORM.PASSWORD}</Text>
+              <Text style={styles.profiletextHeader}>{CONSTANTS.LOGINFORM.WDCODE}</Text>
               <TextInput
                 style={styles.profiletextInputLayout}
-                 secureTextEntry value={this.state.password}
-                onChangeText={password => this.setState({ password: password  })}
+                  value={this.state.wdcode}
+                onChangeText={password => this.setState({ wdcode: wdcode  })}
               />
               <Text style={styles.profiletextHeader}>{CONSTANTS.LOGINFORM.GST}</Text>
               <TextInput
                 style={styles.profiletextInputLayout}
-                secureTextEntry value={this.state.gst}
+                 value={this.state.gst}
                 onChangeText={gst => this.setState({ gst: gst  })}
               />
               </ScrollView>
             </View>
             <View style={{flex:0.4,flexDirection:'row',justifyContent:'flex-end',alignItems:'center'}}>
-            <TouchableHighlight style={styles.defaultbutton}>
-                <Text style={styles.defaultbuttonText}>{CONSTANTS.DEFAULT}</Text>
-            </TouchableHighlight>
-            <TouchableHighlight style={styles.savebutton}>
-                <Text style={styles.savebuttonText}>{CONSTANTS.SAVE}</Text>
-            </TouchableHighlight>
+
             </View>
 
         </View>
@@ -116,4 +135,10 @@ class Profile extends Component<Props> {
   }
 }
 
-export default connect(null, null)(Profile);
+export default connect(mapStateToProps, null)(Profile);
+// <TouchableHighlight style={styles.defaultbutton}>
+//     <Text style={styles.defaultbuttonText}>{CONSTANTS.DEFAULT}</Text>
+// </TouchableHighlight>
+// <TouchableHighlight style={styles.savebutton}>
+//     <Text style={styles.savebuttonText}>{CONSTANTS.SAVE}</Text>
+// </TouchableHighlight>

@@ -1,5 +1,5 @@
 const initialState ={
-  name :'vishal'
+  currentPage:'Login'
 }
 export default function(state=initialState,action){
   switch(action.type){

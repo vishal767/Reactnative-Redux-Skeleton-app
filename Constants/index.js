@@ -14,14 +14,19 @@ export const CONSTANTS ={
       PASSWORD:'Password',
       GST:'GST No',
       WEBSITE:'Website',
-      EMAIL:'Mail Id'
+      EMAIL:'Mail Id',
+      WDCODE:"WD Code"
     },
     SAVE:'Save',
     DEFAULT:'Default',
-    BHM:"Bhm",
+    BHM:"BHMCGScore",
+    OFM:"OFMCGBHMScore",
+    CEM:"CEM",
+    BSP:"BSP",
     PROFILE:"Profile",
     LEADER_BOARD:"LeaderBoard",
-    NOTIFICATIONS:'Notifications'
+    NOTIFICATIONS:'Notifications',
+    APPURL:"http://52.66.251.188:4500/api"
 }
 export const COLORS = {
   TEXTLABELCOLOR:"#00a662",
@@ -101,7 +106,7 @@ export const styles = StyleSheet.create({
        textHeader:{ color:COLORS.TEXTLABELCOLOR, marginTop: 10, marginBottom:5},
        textInputLayout:{borderBottomColor: COLORS.DIM_GREY, borderBottomWidth: 1, color: COLORS.TEXTLABELCOLOR, height: 40,margin:20},
        profiletextHeader:{ color:CONSTANTS.BLACK, marginTop: 10, marginBottom:5,marginLeft:20},
-       profiletextInputLayout:{borderBottomColor: COLORS.DIM_GREY, borderWidth: 1, color: 'white', height: 50,margin:20,marginTop:5,fontSize:20,backgroundColor:COLORS.VERY_DIM_GREY},
+       profiletextInputLayout:{borderBottomColor: COLORS.DIM_GREY, borderWidth: 1, color: COLORS.BLACK, height: 50,margin:20,marginTop:5,fontSize:20,backgroundColor:COLORS.VERY_DIM_GREY},
        containerStyle: {
       borderWidth: 1.5,
       borderRadius: 1.5,

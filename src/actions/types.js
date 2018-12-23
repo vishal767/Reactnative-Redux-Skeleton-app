@@ -1,0 +1,5 @@
+export const UPDATE_DATA = "UPDATE_DATA";
+export const DELETE_DATA = "DELETE_DATA";
+export const UPDATE_EMAIL="UPDATE_EMAIL";
+export const UPDATE_LOGIN="UPDATE_LOGIN";
+export const UPDATE_PROFILE="UPDATE_PROFILE";

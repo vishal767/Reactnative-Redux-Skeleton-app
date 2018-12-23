@@ -5,6 +5,7 @@ import {
   View,
   TouchableHighlight,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Image,
   Alert,
   TextInput,
@@ -13,6 +14,7 @@ import {
   ImageBackground,
 
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import {
     Container,
     Header,
@@ -26,21 +28,49 @@ import {
   } from "native-base";
   import appImage from '../images/back.png';
   import {connect} from 'react-redux';
+  import Feed from '../feed';
   import {CONSTANTS,COLORS,styles} from '../../Constants';
-  import Notification from './notifications';
+  import Notification from '../notifications';
 import Carousel from 'react-native-snap-carousel';
 import SideMenu from 'react-native-side-menu';
-
+import {updateLogin} from '../actions/appAction';
+import {GET_OVERALL_DETAILS} from '../api';
+import Speedometer from 'react-native-speedometer-chart';
 type Props = {};
 
 
+const mapStateToProps = state => ({
+  credentials:state.auth
+});
  class Home extends Component<Props> {
     constructor(props){
     super(props);
     this.state={
+      credentials:this.props.credentials,
 
-      email: '',
-      password: '',
+      notification:false,
+      mainData:{
+      BHMCGScore:  {
+          value:50,
+          diff:0
+        },
+        OFMCGBHMScore:{
+          value:50,
+          diff:0
+        },
+        BSP:{
+          value:50,
+          diff:0
+        },
+      CEM:{
+          value:50,
+          diff:0
+        }
+      },
+      AgencyDetails:{
+        name:"Loading name..",
+        city:"Hosur"
+      },
       feed:[
         {
           title:'name',
@@ -50,66 +80,78 @@ type Props = {};
           title:'name1',
           name:'name1'
         },
-        {
-          title:'name2',
-          name:'name2'
-        },
-        {
-          title:'name2',
-          name:'name2'
-        },
-        {
-          title:'name2',
-          name:'name2'
-        },
-        {
-          title:'name2',
-          name:'name2'
-        },
-        {
-          title:'name2',
-          name:'name2'
-        },
-        {
-          title:'name2',
-          name:'name2'
-        },
-        {
-          title:'name2',
-          name:'name2'
-        }
+
       ],
-      notification:false
-    }
-    this.org = this.org.bind(this);
+      loading:true
     }
 
-  login(){
-    this.props.navigation.navigate('Login');
-  }
-  org()
-{
+    }
 
 
-}
-_renderItem ({item, index}) {
-        return (
-            <View style={{backgroundColor:COLORS.WHITE,height:90,justifyContent:'center',elevation:2,borderWidth:0,borderRadius:7}}>
-                <View style={{flex:1,flexDirection:'row',borderRadius:10}}>
-                  <View style={{flex:2,justifyContent:'center',alignItems:'center'}}>
-                    <Image source={require('../images/rocket.png')}
-                        style={{width:80,height:80}}
-                      />
-                  </View>
-                  <View style={{flex:5,justifyContent:'center',alignItems:'center'}}>
-                      <Text >{ 'Your Money optimization metric has been decresed by 10%'}</Text>
-                  </View>
-                </View>
-            </View>
-        );
+
+    componentDidMount(){
+      let {credentials} =this.state;
+      if(credentials.token!=undefined){
+        GET_OVERALL_DETAILS(credentials.token)
+          .then(res => {
+            console.log(res)
+            if(res.error==undefined){
+            let {diff,latest_overall,least_improved,lowest_value}=res;
+            this.getMainData(diff,latest_overall);
+            let {AgencyDetails} = this.state;
+            let feed = [];
+            if(least_improved!=undefined){
+              let obj={};
+              obj.title=`You have shown the least improvement in the ${least_improved.measure} . It has changed ${Math.abs(least_improved.diff)}% over the previous month`
+              feed.push(obj);
+            }
+            if(lowest_value!=undefined){
+              let obj={};
+              obj.title=`In this month, you have performed the worst in ${lowest_value.measure}`;
+              feed.push(obj);
+            }
+            AgencyDetails.name=latest_overall.WDFirm;
+            this.setState({
+              AgencyDetails,
+              feed
+            })
+          }
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }
+    }
+    getMainData(diff,latest_overall){
+
+      if(diff==undefined || latest_overall==undefined)return;
+
+      let {mainData} = this.state;
+      mainData.BHMCGScore.value=latest_overall.BHMCGScore;
+      mainData.OFMCGBHMScore.value=latest_overall.OFMCGBHMScore;
+      mainData.BSP.value=latest_overall.BSP;
+      mainData.CEM.value=latest_overall.CEM;
+      for(var i in diff){
+        let diff_iter=diff[i];
+        if(mainData[diff_iter.measure]!=undefined)
+        mainData[diff_iter.measure].diff=diff_iter.diff;
+      }
+      this.setState({
+        mainData
+      },()=>console.log(mainData))
+
+    }
+    getConsole(something){
+      console.log(something);
+    }
+    getDeg(value){
+      let deg = (value*2.05)-15;
+      console.log(value,deg)
+      return `${deg}deg`;
     }
   render() {
     const menu = <Notification/>;
+    let {mainData,AgencyDetails} =this.state;
     return (
         <Container style={styles.container}>
         <StatusBar
@@ -135,73 +177,91 @@ _renderItem ({item, index}) {
           </Header>
 
         <View style={{flex:1,flexDirection:'column',backgroundColor:COLORS.WHITE}}>
-          <View style={{flex:1,justifyContent:'center',}}>
+          <View style={{flex:0.8,justifyContent:'center',}}>
 
                   <View style={{flex:1,flexDirection:'row',borderRadius:10,margin:20,elevation:3,backgroundColor:COLORS.WHITE}}>
                                         <View style={{flex:3,justifyContent:'center',alignItems:'center'}}>
                       <Image source={require('../images/profile.png')}
-                          style={{width:100,height:105}}
+                          style={{width:60,height:55}}
                         />
                     </View>
-                    <View style={{flex:5,justifyContent:'center',alignItems:'flex-start',borderLeftColor:'red',borderLeftWidth:1,borderColor:COLORS.DIM_GREY,marginTop:20,marginBottom:20,paddingLeft:10}}>
-                        <Text style={{fontSize:28,fontWeight:'bold'}}>{'Siva Agency'}</Text>
-                        <Text style={{fontSize:18}}>{'Hosur'}</Text>
+                    <View style={{flex:8,justifyContent:'center',alignItems:'flex-start',borderLeftColor:'red',borderLeftWidth:1,borderColor:COLORS.DIM_GREY,marginTop:20,marginBottom:20,paddingLeft:10}}>
+                        <Text style={{fontSize:22,fontWeight:'bold',marginBottom:7}}>{AgencyDetails.name}</Text>
+
+                        <Text style={{fontSize:12}}>{'Hosur'}</Text>
                     </View>
 
                   </View>
 
           </View>
-          <View style={{flex:2,}}>
-            <View style={{flex:1,flexDirection:'row',}}>
-              <View style={{flex:1,flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-                <TouchableOpacity onPress={()=> this.props.navigation.navigate('Bhm')}>
-                  <Image source={require('../images/group1.png')} style= {{ width: 135,height:135}}/>
-                </TouchableOpacity>
+          <View style={{flex:2.3,justifyContent:'center'}}>
+            <View style={{flexDirection:'row',marginLeft:10,marginRight:10,height:160}}>
+              <View style={{flex:1,flexDirection:'column'}}>
+                  <TouchableWithoutFeedback onPress={()=>this.props.navigation.navigate('Bhm')}>
+                  <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={["#f01e29","#f7626a"]} style={{flex:1,backgroundColor:'red',marginTop:10,marginBottom:10,marginLeft:20,marginRight:20,elevation:2,borderRadius:10,alignItems:'center'}}>
+                        <Image source={require('../images/speedometer.png')} style={{width:"55%",height:75,margin:10,marginBottom:5}}/>
+                        <View style={{ position: 'absolute', transform: [{ rotate: this.getDeg(mainData.BHMCGScore.value) }], top: -5, bottom: 0, left: -5, right: -5, justifyContent: 'center',margin:60 }}>
+                          <View  style={{ width: 25, borderWidth: 2, borderColor: '#1d3960', elevation: 4 }} />
+                        </View>
+                      <Text style={{color:COLORS.WHITE,textAlign:'center',fontSize:12}}>{CONSTANTS.BHM}</Text>
+                      <Text style={{color:COLORS.WHITE,textAlign:'center',justifyContent:"center",fontSize:12,fontWeight:"bold"}}>{Math.abs(mainData.BHMCGScore.diff)+"%"}<Icon name='ios-arrow-down' style={{color:COLORS.WHITE,justifyContent:'center',fontSize:14}}  /></Text>
+                  </LinearGradient>
+                  </TouchableWithoutFeedback>
+              </View>
+              <View style={{flex:1,flexDirection:'column'}}>
+                <TouchableWithoutFeedback onPress={()=>this.props.navigation.navigate('Ofm')}>
+                <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={["#eaab46","#e59746"]} style={{flex:1,backgroundColor:'red',marginTop:10,marginBottom:10,marginLeft:20,marginRight:20,elevation:2,borderRadius:10,alignItems:'center'}}>
+                  <Image source={require('../images/speedometer.png')} style={{width:"55%",height:75,margin:10,marginBottom:5}}/>
+                  <View style={{ position: 'absolute', transform: [{ rotate: this.getDeg(mainData.OFMCGBHMScore.value) }], top: -5, bottom: 0, left: -5, right: -5, justifyContent: 'center',margin:60 }}>
+                    <View  style={{ width: 25, borderWidth: 2, borderColor: '#1d3960', elevation: 4 }} />
+                  </View>
+                  <Text style={{color:COLORS.WHITE,textAlign:'center',fontSize:12}}>{CONSTANTS.OFM}</Text>
+                  <Text style={{color:COLORS.WHITE,textAlign:'center',justifyContent:"center",fontSize:12,fontWeight:"bold"}}>{Math.abs(mainData.OFMCGBHMScore.diff)+"%"}<Icon name='ios-arrow-down' style={{color:COLORS.WHITE,justifyContent:'center',fontSize:14}}  /></Text>
+                </LinearGradient>
+                </TouchableWithoutFeedback>
+              </View>
+            </View>
+            <View style={{flexDirection:'row',marginLeft:10,marginRight:10,height:160}}>
+              <View style={{flex:1,flexDirection:'column'}}>
+                <TouchableWithoutFeedback onPress={()=>this.props.navigation.navigate('Cem')}>
+                <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={["#4a69f3","#7ea5f9"]} style={{flex:1,backgroundColor:'red',marginTop:10,marginBottom:10,marginLeft:20,marginRight:20,elevation:2,borderRadius:10,alignItems:'center'}}>
+                  <Image source={require('../images/speedometer.png')} style={{width:"55%",height:75,margin:10,marginBottom:5}}/>
+                  <View style={{ position: 'absolute', transform: [{ rotate: this.getDeg(mainData.CEM.value) }], top: -5, bottom: 0, left: -5, right: -5, justifyContent: 'center',margin:60 }}>
+                    <View  style={{ width: 25, borderWidth: 2, borderColor: '#1d3960', elevation: 4 }} />
+                  </View>
+                  <Text style={{color:COLORS.WHITE,textAlign:'center',fontSize:12}}>{CONSTANTS.CEM}</Text>
+                  <Text style={{color:COLORS.WHITE,textAlign:'center',justifyContent:"center",fontSize:12,fontWeight:"bold"}}>{Math.abs(mainData.CEM.diff)+"%"}<Icon name='ios-arrow-down' style={{color:COLORS.WHITE,justifyContent:'center',fontSize:14}}  /></Text>
+                </LinearGradient>
+                </TouchableWithoutFeedback>
+              </View>
+              <View style={{flex:1,flexDirection:'column'}}>
+                <TouchableWithoutFeedback onPress={()=>this.props.navigation.navigate('Bsp')}>
+                <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={["#78bbd2","#4485b4"]} style={{flex:1,backgroundColor:'red',marginTop:10,marginBottom:10,marginLeft:20,marginRight:20,elevation:2,borderRadius:10,alignItems:'center'}}>
+                  <Image source={require('../images/speedometer.png')} style={{width:"55%",height:75,margin:10,marginBottom:5}}/>
+                  <View style={{ position: 'absolute', transform: [{ rotate: this.getDeg(mainData.BSP.value) }], top: -5, bottom: 0, left: -5, right: -5, justifyContent: 'center',margin:60 }}>
+                    <View  style={{ width: 25, borderWidth: 2, borderColor: '#1d3960', elevation: 4 }} />
+                  </View>
+                  <Text style={{color:COLORS.WHITE,textAlign:'center',fontSize:12}}>{CONSTANTS.BSP}</Text>
+                  <Text style={{color:COLORS.WHITE,textAlign:'center',justifyContent:"center",fontSize:12,fontWeight:"bold"}}>{Math.abs(mainData.BSP.diff)+"%"}<Icon name='ios-arrow-down' style={{color:COLORS.WHITE,justifyContent:'center',fontSize:14}}  /></Text>
+                </LinearGradient>
+                </TouchableWithoutFeedback>
+              </View>
+            </View>
 
-              </View>
-              <View style={{flex:1,flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-              <TouchableOpacity onPress={()=> this.props.navigation.navigate('Bhm')}>
-                <Image source={require('../images/group2.png')} style= {{ width: 135,height:135}} />
-              </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{flex:1,flexDirection:'row'}}>
-              <View style={{flex:1,flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-                <TouchableOpacity onPress={()=> this.props.navigation.navigate('Bhm')}>
-                  <Image source={require('../images/group4.png')} style= {{ width: 135,height:135}} />
-                </TouchableOpacity>
-              </View>
-              <View style={{flex:1,flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-                <TouchableOpacity onPress={()=> this.props.navigation.navigate('Bhm')}>
-                  <Image source={require('../images/group3.png')} style= {{ width: 135,height:135}}/>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={{flex:0.3,flexDirection:'row'}}>
-                <View style={{flex:4,flexDirection:'column',justifyContent:'center',}}>
-                  <View style={{backgroundColor:COLORS.BLACK,height:2,margin:10}}/>
-                </View>
-                <View style={{flex:1,flexDirection:'column',justifyContent:'center',textAlign:'center'}}>
-                  <Text>{' Feed'}</Text>
-                </View>
-                <View style={{flex:4,flexDirection:'column',justifyContent:'center',}}>
-                  <View style={{backgroundColor:COLORS.BLACK,height:2,margin:10}}/>
-                </View>
-            </View>
           </View>
-          <View style={{flex:0.8,justifyContent:'center',alignItems:'center',marginBottom:10}}>
-
-            <Carousel
-                  ref={(c) => { this._carousel = c; }}
-                  layout={'tinder'}
-                  layoutCardOffset={10}
-                  data={this.state.feed}
-                  renderItem={this._renderItem}
-                  sliderWidth={450}
-                  itemWidth={400}
-                  loop={true}
-
-                />
+          <View style={{flex:1.0,justifyContent:'center',alignItems:'center',marginBottom:10}}>
+          <View style={{flex:0.5,flexDirection:'row'}}>
+              <View style={{flex:4,flexDirection:'column',justifyContent:'center',}}>
+                <View style={{backgroundColor:COLORS.BLACK,height:2,margin:10}}/>
+              </View>
+              <View style={{flex:1,flexDirection:'column',justifyContent:'center',textAlign:'center'}}>
+                <Text>{' Feed'}</Text>
+              </View>
+              <View style={{flex:4,flexDirection:'column',justifyContent:'center',}}>
+                <View style={{backgroundColor:COLORS.BLACK,height:2,margin:10}}/>
+              </View>
+          </View>
+            <Feed feed={this.state.feed}/>
           </View>
 
           </View>
@@ -211,6 +271,6 @@ _renderItem ({item, index}) {
     );
   }
 }
-export default connect(null, null)(Home);
+export default connect(mapStateToProps, {updateLogin})(Home);
 
 // <ImageBackground source={require('../images/group3.png')} style= {{flex:1 , width: null,height:null}} resizeMode={'contain'}>

@@ -30,10 +30,9 @@ import {
 import {CONSTANTS,COLORS,styles} from '../../Constants';
 import Chart from './chart';
 import Carousel from 'react-native-snap-carousel';
-import Feed from '../feed';
 import {GET_GRAPH_DETAILS} from '../api';
 type Props = {};
-
+import Feed from '../feed';
 const mapStateToProps = state => ({
   credentials:state.auth
 });
@@ -53,7 +52,7 @@ class BhmPage extends Component<Props> {
         },
       ],
       credentials:this.props.credentials,
-      submeasure:"KSFT",
+      submeasure:"MoneyOptimization",
       graph_data:{
         measurearray:[],
         montharray:[]
@@ -69,17 +68,18 @@ class BhmPage extends Component<Props> {
     GET_GRAPH_DETAILS(submeasure,credentials.token)
       .then(res =>{
         console.log(res);
+        let feed=[];
         if(res.error==undefined){
-          let feed=[];
+
           if(res.MoM!=undefined){
             let obj={};
             let MoM=res.MoM;
             if(MoM.diff>0)
-            obj.title=`your MoM for  ${res.MoM.subMeasure} is increased by ${Math.abs(MoM.diff)}`;
+            obj.title=`there is a increase of ${Math.abs(MoM.diff)} points over the previous month.`;
             if(MoM.diff<0)
-            obj.title=`your MoM for  ${res.MoM.subMeasure} is decreased by ${Math.abs(MoM.diff)}`;
+            obj.title=`there is a decrease of ${Math.abs(MoM.diff)} points over the previous month.`;
             if(MoM.diff==0)
-            obj.title=`your MoM for  is same as last month`;
+            obj.title=`your MoM for  is same as the previous month`;
             feed.push(obj);
           }
           if(res.leader_diff!=undefined){
@@ -88,7 +88,7 @@ class BhmPage extends Component<Props> {
             if(leader_diff.self)
             obj.title=`You are leading with Rank 1 in this sub Measure! `;
             else{
-              obj.title=`You are lagging  by ${leader_diff.diff} points in this sub Measure `;
+              obj.title=`you are ${Math.abs(leader_diff.diff)} points away from the top perfoming distributor in your region`;
             }
             feed.push(obj);
           }
@@ -117,20 +117,21 @@ class BhmPage extends Component<Props> {
               <Icon name='ios-menu' style={{color:COLORS.WHITE}} onPress={() => this.props.navigation.openDrawer()} />
               </Left>
             <Body >
-              <Text style={styles.statusHead}>{CONSTANTS.BHM}</Text>
+              <Text style={styles.statusHead}>{CONSTANTS.BSP}</Text>
             </Body>
         </Header>
         <View style={{flex:1,flexDirection:'column'}}>
             <View style={{flex:3.5,margin:20,backgroundColor:COLORS.WHITE,borderRadius:10,elevation:5}}>
                 <Picker
                 selectedValue={this.state.submeasure}
-                style={{ height: 50, width: 130 ,marginLeft:25,alignItems:'center',textAlign:'center',justifyContent:'center'}}
+                style={{ height: 50, width: 220 ,marginLeft:25,alignItems:'center',textAlign:'center',justifyContent:'center'}}
                 onValueChange={(itemValue, itemIndex) => this.setState({submeasure: itemValue},()=>this.getSubMeasureValues())}>
-                    <Picker.Item label="KSFT" value="KSFT" />
-                    <Picker.Item label="LONGS" value="LONGS" />
-                    <Picker.Item label="DSFT" value="DSFT" />
-                    <Picker.Item label="FB1" value="FB1" />
-                    <Picker.Item label="FB2" value="FB2" />
+                    <Picker.Item label="MoneyOptimization" value="MoneyOptimization" />
+                    <Picker.Item label="MarketDevelopment" value="MarketDevelopment" />
+                    <Picker.Item label="NeevFoundation" value="NeevFoundation" />
+                    <Picker.Item label="DSEfficiency" value="DSEfficiency" />
+                    <Picker.Item label="OFR" value="OFR" />
+                    <Picker.Item label="HandheldUsage" value="HandheldUsage" />
                 </Picker>
                  <View style={{flex:1,justifyContent:'center'}}>
                 <Chart data={measurearray} month={montharray}/>
@@ -156,7 +157,7 @@ class BhmPage extends Component<Props> {
 
             </View>
             <View style={{flex:1.5,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-              <TouchableOpacity onPress={()=> this.props.navigation.navigate('LeaderBoard',{measure:CONSTANTS.BHM})}>
+              <TouchableOpacity onPress={()=> this.props.navigation.navigate('LeaderBoard',{measure:CONSTANTS.BSP})}>
               <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={[COLORS.THEME,COLORS.END_GRADIENT]} style={styles.linearGradient}>
                 <Text style={styles.buttonText}>
                   LeaderBoard <Icon name='md-arrow-forward' style={{ fontSize:23, color: COLORS.WHITE,marginLeft:20}} />

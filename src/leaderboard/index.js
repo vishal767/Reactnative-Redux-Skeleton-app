@@ -27,8 +27,11 @@ import {
     Right
   } from "native-base";
 import {CONSTANTS,COLORS,styles} from '../../Constants';
-
+import {GET_Leaderboard_DETAILS} from '../api';
 type Props = {};
+const mapStateToProps = state => ({
+  credentials:state.auth
+});
 class LeaderBoard extends Component<Props> {
   constructor(props){
     super(props);
@@ -49,10 +52,32 @@ class LeaderBoard extends Component<Props> {
           {
           name:'Rat Agnecy'
           },
-      ]
+      ],
+      measure:this.props.navigation.state.params.measure,
+      credentials:this.props.credentials
+
     }
   }
 
+  componentDidMount(){
+    this.getRanks();
+  }
+  getRanks(){
+    let {measure,credentials} = this.state;
+    if(measure==undefined)measure='BSP';
+    GET_Leaderboard_DETAILS(measure,credentials.token)
+      .then(res => {
+        console.log(res)
+        if(res.error==undefined){
+          this.setState({
+            ranks:res
+          })
+        }
+      })
+      .catch(err =>{
+        console.log(err)
+      })
+  }
   getProfile(value,i){
       return(
         <View colors={[COLORS.END_GRADIENT,COLORS.THEME]} style={{margin:10,borderRadius:10,elevation:5,flexDirection:'row',height:100,backgroundColor:COLORS.WHITE}} >
@@ -62,7 +87,7 @@ class LeaderBoard extends Component<Props> {
            <View style={{flex:2,flexDirection:'column'}}>
                <View style={{flex:1,justifyContent:'center',flexDirection:'row',borderBottomWidth:1,marginBottom:10}}>
                  <View style={{flex:1,flexDirection:'column',justifyContent:'center'}}>
-                    <Text style={{fontSize:16,color:COLORS.BLACK}}>{value.name}</Text>
+                    <Text style={{fontSize:14,color:COLORS.BLACK}}>{value.WDFirm}</Text>
                  </View>
                  <View style={{flex:1,flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
                    <Image source={require('../images/medal.png')} style={{width:10,height:20,textAlign:'right'}}/>
@@ -82,6 +107,7 @@ class LeaderBoard extends Component<Props> {
         </View>
       )
   }
+
 
   render() {
     return (
@@ -151,5 +177,5 @@ class LeaderBoard extends Component<Props> {
 //   </LinearGradient>
 //   </TouchableOpacity>
 // </View>
-export default connect(null, null)(LeaderBoard);
+export default connect(mapStateToProps, null)(LeaderBoard);
 // <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={[COLORS.END_GRADIENT,COLORS.THEME]} style={{flex:0.7,margin:10,borderRadius:10,elevation:5,flexDirection:'row'}} >

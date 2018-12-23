@@ -30,8 +30,8 @@ import {
 import {CONSTANTS,COLORS,styles} from '../../Constants';
 import Chart from './chart';
 import Carousel from 'react-native-snap-carousel';
-import Feed from '../feed';
 import {GET_GRAPH_DETAILS} from '../api';
+import Feed from '../feed';
 type Props = {};
 
 const mapStateToProps = state => ({
@@ -53,7 +53,7 @@ class BhmPage extends Component<Props> {
         },
       ],
       credentials:this.props.credentials,
-      submeasure:"KSFT",
+      submeasure:"FoodsDnD",
       graph_data:{
         measurearray:[],
         montharray:[]
@@ -69,8 +69,8 @@ class BhmPage extends Component<Props> {
     GET_GRAPH_DETAILS(submeasure,credentials.token)
       .then(res =>{
         console.log(res);
+        let feed=[];
         if(res.error==undefined){
-          let feed=[];
           if(res.MoM!=undefined){
             let obj={};
             let MoM=res.MoM;
@@ -117,20 +117,18 @@ class BhmPage extends Component<Props> {
               <Icon name='ios-menu' style={{color:COLORS.WHITE}} onPress={() => this.props.navigation.openDrawer()} />
               </Left>
             <Body >
-              <Text style={styles.statusHead}>{CONSTANTS.BHM}</Text>
+              <Text style={styles.statusHead}>{CONSTANTS.CEM}</Text>
             </Body>
         </Header>
         <View style={{flex:1,flexDirection:'column'}}>
             <View style={{flex:3.5,margin:20,backgroundColor:COLORS.WHITE,borderRadius:10,elevation:5}}>
                 <Picker
                 selectedValue={this.state.submeasure}
-                style={{ height: 50, width: 130 ,marginLeft:25,alignItems:'center',textAlign:'center',justifyContent:'center'}}
+                style={{ height: 50, width: 160 ,marginLeft:25,alignItems:'center',textAlign:'center',justifyContent:'center'}}
                 onValueChange={(itemValue, itemIndex) => this.setState({submeasure: itemValue},()=>this.getSubMeasureValues())}>
-                    <Picker.Item label="KSFT" value="KSFT" />
-                    <Picker.Item label="LONGS" value="LONGS" />
-                    <Picker.Item label="DSFT" value="DSFT" />
-                    <Picker.Item label="FB1" value="FB1" />
-                    <Picker.Item label="FB2" value="FB2" />
+                    <Picker.Item label="FoodsDnD" value="FoodsDnD" />
+                    <Picker.Item label="PCPDnD" value="PCPDnD" />
+
                 </Picker>
                  <View style={{flex:1,justifyContent:'center'}}>
                 <Chart data={measurearray} month={montharray}/>
@@ -156,7 +154,7 @@ class BhmPage extends Component<Props> {
 
             </View>
             <View style={{flex:1.5,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-              <TouchableOpacity onPress={()=> this.props.navigation.navigate('LeaderBoard',{measure:CONSTANTS.BHM})}>
+              <TouchableOpacity onPress={()=> this.props.navigation.navigate('LeaderBoard',{measure:CONSTANTS.CEM})}>
               <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={[COLORS.THEME,COLORS.END_GRADIENT]} style={styles.linearGradient}>
                 <Text style={styles.buttonText}>
                   LeaderBoard <Icon name='md-arrow-forward' style={{ fontSize:23, color: COLORS.WHITE,marginLeft:20}} />

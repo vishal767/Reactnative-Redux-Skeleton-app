@@ -21,12 +21,14 @@ import {
   import appImage from '../images/back.png';
   import {connect} from 'react-redux';
   import {CONSTANTS,COLORS,styles} from '../../Constants';
-
-
+import {LOGINAPI} from '../api';
+import {updateLogin} from '../actions/appAction';
 
 type Props = {};
 
-
+const mapStateToProps = state => ({
+  isLoggedIn:state.auth.isLoggedIn
+});
  class StartPage extends Component<Props> {
     constructor(props){
     super(props);
@@ -39,8 +41,18 @@ type Props = {};
     }
 
   login(){
-
-    this.props.navigation.navigate('Home');
+    let {email,password}=this.state;
+    LOGINAPI(email,password)
+      .then(res => {
+        console.log(res)
+        if(res.error==undefined){
+            this.props.updateLogin(res.id,true,res.userId);
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  //  this.props.updateLogin("token",true);
 
   }
   org()
@@ -107,7 +119,7 @@ type Props = {};
     );
   }
 }
-export default connect(null, null)(StartPage);
+export default connect(mapStateToProps, {updateLogin})(StartPage);
 
 
   // <Header androidStatusBarColor='#2D2D2D' style={{backgroundColor:'#2B2B2B'}}>
@@ -120,4 +132,4 @@ export default connect(null, null)(StartPage);
   //       <Right style={{marginRight:5}}>
   //         <Icon name='ios-menu' style={{color:'#2D2D2D'}}  />
   //         </Right>
-  //     </Header>
+  // </Header>

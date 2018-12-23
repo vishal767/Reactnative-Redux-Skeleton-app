@@ -27,16 +27,16 @@ import {
     Right
   } from "native-base";
 import {CONSTANTS,COLORS,styles} from '../../Constants';
+import {GET_NOTIFICATIONS} from '../api';
 type Props = {};
+const mapStateToProps = state => ({
+  credentials:state.auth
+});
 class Notification extends Component<Props> {
   constructor(props){
     super(props);
     this.state= {
-      name:'',
-      email:'',
-      password:'',
-      website:'',
-      gst:'',
+      credentials:this.props.credentials,
       notifications:[
         {
           desc:'Tomorrow new product launch',
@@ -55,18 +55,42 @@ class Notification extends Component<Props> {
 
     }
   }
+  componentDidMount(){
+    let {credentials} = this.state;
+    GET_NOTIFICATIONS(credentials.token)
+      .then(res =>{
+        console.log(res)
+        let notifications=[];
+        if(res.error==undefined){
+          for(let i in res){
+            let index = res[i];
+            if(index.message!=undefined){
+              let obj={};
+              obj.desc=index.message;
+              notifications.push(obj)
+            }
+          }
+          this.setState({
+            notifications
+          })
+        }
+      })
+      .catch(err =>{
+        console.log(err)
+      })
+  }
   getNotifications(){
       let {notifications}=this.state;
       let renderer=[];
       notifications.forEach(index => {
         let comp = (
-          <View style={{flex:1,flexDirection:'row',borderBottomWidth:1,borderColor:COLORS.DIM_GREY,marginBottom:5}}>
+          <View style={{height:50 ,flexDirection:'row',borderBottomWidth:1,borderColor:COLORS.DIM_GREY,marginBottom:5}}>
             <View style={{flex:0.1,flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
               <Icon name='ios-notifications' style={{color:'red'}} />
             </View>
-            <View style={{flex:0.9,flexDirection:'column',justifyContent:'center',marginBottom:5}}>
+            <View style={{flex:0.9,flexDirection:'column',justifyContent:'center'}}>
               <Text style={{fontSize:16,color:COLORS.BLACK,textAlign:'left',marginBottom:5}}>{index.desc}</Text>
-              <Text style={{fontSize:12,color:COLORS.DIM_GREY,textAlign:'right',marginRight:10}}>{index.time}</Text>
+
             </View>
           </View>
         )
@@ -99,4 +123,5 @@ class Notification extends Component<Props> {
 
 }
 
-export default connect(null, null)(Notification);
+export default connect(mapStateToProps, null)(Notification);
+// <Text style={{fontSize:12,color:COLORS.DIM_GREY,textAlign:'right',marginRight:10}}>{index.time}</Text>

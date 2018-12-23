@@ -29,22 +29,25 @@ import {styles,CONSTANTS,COLORS} from './Constants';
 import {store} from './store';
 import Profile from './src/profile';
 import BhmPage from './src/bhm';
+import OfmPage from './src/OFM';
+import CemPage from './src/CEM';
+import BspPage from './src/BSP';
 import LeaderBoard from './src/leaderboard';
 
 const DN = createStackNavigator({
-  Login: { screen: StartPage },
-  Home:{screen:HomePage},
-  Profile:{screen:Profile},
-  LeaderBoard:{screen:LeaderBoard}
+  Bhm :{ screen:BhmPage},
+  Ofm :{ screen:OfmPage},
+  Cem :{ screen:CemPage},
+  Bsp :{ screen:BspPage}
 
 },{
-  initialRouteName: 'Login',
-  headerMode: 'none',
+  initialRouteName: 'Bhm',
+  headerMode: 'Bhm',
 });
 
 const Navigation = createDrawerNavigator(
       {
-          Home: { screen: DN,
+          Home: { screen: HomePage,
           navigationOptions: {
             drawerIcon: (
                 <Icon name='ios-battery-full'
@@ -62,7 +65,7 @@ const Navigation = createDrawerNavigator(
           }
 
         },
-          Bhm :{ screen:BhmPage,
+          Measures :{ screen:DN,
             navigationOptions: {
               drawerIcon: (
                   <Icon name='ios-cut'
